@@ -29,7 +29,7 @@ The algorithms employed for modelling are classification tree (rpart library) an
 
 Success of our algorithms is evaluated using the Area under the Receiver Operating Characteristics (ROC) curve. One could argue that financial institutions prefer to be more conservative in their anti-fraud policy (thus prefering an algorithm prone to classifying transactions as frauds) and desire to minimize the algorithm's False Negatives (since we consider No Fraud class as positive), measured by the Sensitivity metric. But on the other hand, institutions could also care about customer satisfaction and do not wish to unnecessarily block non fraudulent transactions classified as frauds. Under this scenario, they would seek to minimize False Positives (cases where the algo predicted Fraud even though it wasn't) and thus maximize specificity. A pretty convenient solution that takes into consideration both strategies is the ROC curve. This curve is constructed by using model's Specificity on the x-axis and Sensitivity on the y-axis.  
 
-Because our algorithms are trained on the balanced train set, we also test it in the unbalanced test set, where fraud cases are very rare. Success rates are very close to those obtained from the balanced dataset.
+Because our algorithms are trained on the balanced train set, we also test it in the unbalanced test set, where fraud cases are very rare. Success rates are close to those obtained from the balanced dataset.
 
 
 ```{r library_import, echo=TRUE,warning=FALSE,message=FALSE}
@@ -1098,7 +1098,9 @@ Apparently, the tree is by far better in overfitting between train an test sets.
 ## Balanced - Unbalanced Difference
 
 We will proceed accordingly with the Balanced - Unbalanced diff.
-```{r}
+
+
+```{r unbal_overfit_plot, echo = FALSE, message=FALSE}
 temp <- data.frame( model = c("Tree","Forest"), performance = c(tree_unb_perf,for_unb_perf)  )
 
 temp %>%ggplot( aes(x = model, y = performance  ) ) + 
@@ -1111,6 +1113,7 @@ temp %>%ggplot( aes(x = model, y = performance  ) ) +
   
 
 ```
+
 
 
 
