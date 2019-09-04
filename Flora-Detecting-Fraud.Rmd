@@ -830,7 +830,8 @@ rpart_ROC_b <- roc(response = test_set_b$isFraud,
                  predictor = rpart_probs_b$Fraud, 
                  levels = levels(test_set_b$isFraud))
 
-rpart_probs_b_train <- predict(rpart_model_b, train_set_b, type = "prob") #probabilities predictions on balanced test set
+#probabilities predictions on balanced test set
+rpart_probs_b_train <- predict(rpart_model_b, train_set_b, type = "prob") 
 
 rpart_ROC_b_train <- roc(response = train_set_b$isFraud, 
                  predictor = rpart_probs_b_train$Fraud, 
@@ -839,8 +840,10 @@ rpart_ROC_b_train <- roc(response = train_set_b$isFraud,
 plot(rpart_ROC_b, col = "#040491", main = "ROC Curve on Balanced Data Set (Tree Train vs Test)" )
 plot(rpart_ROC_b_train, col = "green", add = TRUE)
 legend(.4,.18, legend = c("Test Set", "Train Set"), col = c("#040491","green"), lty = 1 )
-anot <- paste( "Train - Test Area : ", round(rpart_ROC_b_train$auc - rpart_ROC_b$auc, 3) )
+tree_overfit <- round(rpart_ROC_b_train$auc - rpart_ROC_b$auc, 3)
+anot <- paste( "Train - Test Area : ", tree_overfit  )
 text(labels = anot, x = 0.2, y = .25 )
+
 
 ```
 
@@ -882,9 +885,8 @@ Now time for the ROC curves that represent test set results on Balanced vs the U
 plot(rpart_ROC_b, col = "#040491", main = "Balanced vs Unbalanced Test Set (Classification Tree)" )
 plot(rpart_ROC_c, col = "#63a105",add = TRUE)
 legend(.4,.18, legend = c("Balanced", "Unbalanced"), col = c("#040491","#63a105"), lty = 1 )
-
-anot <- paste( "Balanced - Unbalanced Area : ", round((rpart_ROC_b$auc - rpart_ROC_c$auc), 4) )
-
+tree_unb_perf <- round((rpart_ROC_b$auc - rpart_ROC_c$auc), 4)
+anot <- paste( "Balanced - Unbalanced Area : ",  tree_unb_perf )
 text(labels = anot, x = 0.2, y = .25 )
 
 ```
@@ -942,11 +944,11 @@ The black line shows the [Out-Of-Bag Error](https://en.wikipedia.org/wiki/Out-of
 
 ```{r error_ntree, echo = FALSE}
 #plot error versus number of trees
-plot(rand_for_b$finalModel)
+plot(rand_for_b$finalModel, main = "Estimated Error by Number of Trees")
 ```
 
 
-Seems like all lines reach a plateau at around 50 trees.
+Seems like all lines reach a plateau at around 70 - 100 trees.
 
 #### Variable Importance
 
@@ -955,23 +957,27 @@ Now that we've trained our random forest we can check out the variable importanc
 
 ```{r varimp, echo=FALSE }
 #Variable Importance
-
 imps <- rand_for_b$finalModel$importance
 
+#isolate feature names
 nams <- (imps %>% attr("dimnames"))[[1]]
 
-imps <- imps %>% as.data.frame() %>% cbind(nams) %>% filter(MeanDecreaseGini > 1)
+#bind names with MeandecreaseGini values
+imps <- imps %>% as.data.frame() %>% 
+  cbind(nams) %>% 
+  arrange(desc(MeanDecreaseGini)) %>% 
+  head(10) #keep top 10
 
-imps  %>%
+
+imps %>%
   ggplot( aes(x = reorder(nams,MeanDecreaseGini), y = MeanDecreaseGini ) ) +
   geom_point(size = 9, col = "#ff583b")+
   geom_vline(xintercept = 1: nrow(imps), col = "darkgray") + 
   geom_text( aes(label = round(MeanDecreaseGini,2), size = 5), show.legend = FALSE , col = "black" ) +
   coord_flip()+
-  labs(title = "Variable Importance", x = "", y = "",subtitle = "Features with Importance > 1" )+
+  labs(title = "Variable Importance", x = "", y = "",subtitle = "Top 10 Features" )+
   theme_classic()
 
-#randomForest::varImpPlot(rand_for_b$finalModel)
 
 ```
 
@@ -1012,28 +1018,28 @@ rand_for_ROC_b_test <- roc(response = test_set_b$isFraud,
 plot(rand_for_ROC_b, col = "#040491", main = "ROC Curve on Balanced Data Set (Forest Train vs Test)" )
 plot(rand_for_ROC_b_test, col = "#e6874c", add = TRUE)
 legend(.4,.18, legend = c("Train Set", "Test Set"), col = c("#040491","#e6874c"), lty = 1 )
-
-anot <- paste( "Train - Test Area : ", round((rand_for_ROC_b$auc - rand_for_ROC_b_test$auc), 4) )
-
+for_overfit <- round((rand_for_ROC_b$auc - rand_for_ROC_b_test$auc), 4)
+anot <- paste( "Train - Test Area : ", for_overfit  )
 text(labels = anot, x = 0.2, y = .25 )
-
-
 ```
 
-Yet again, very little overfitting.
+Looks like the forest did not avoid overfitting as the tree did. 
+
 
 ### Balanced vs Unbalanced
 
 ```{r random_sample_preds, echo = FALSE }
 rand_for_pred_c <- predict(rand_for_b, random_sample) #class predictions on random sample set
-print("Rando Sample Confusion Matrix (Unbalanced Data) : ")
+print("Random Sample Confusion Matrix (Unbalanced Data) : ")
 confusionMatrix(random_sample$isFraud, rand_for_pred_c) #results report
 rm(rand_for_pred_c)
 ```
 
+We observe an extremely high Sensitivity and extremely low Specificity. Seems like the forest almost always predicts a no fraud. Though it will almost never misclassify an innocent transaction as fraud, it is very weak in detecting actual frauds as such. Not very useful for a financial institution looking to minimize chargebacks.
 
 ```{r random_ROC, echo=FALSE, message = FALSE}
-rand_for_probs_c <- predict(rand_for_b, random_sample, type = "prob") #probabilities predictions on random sample
+#probabilities predictions on random sample
+rand_for_probs_c <- predict(rand_for_b, random_sample, type = "prob") 
 
 rand_for_ROC_c <- roc(response = random_sample$isFraud, 
                  predictor = rand_for_probs_c$Fraud, 
@@ -1042,16 +1048,20 @@ rand_for_ROC_c <- roc(response = random_sample$isFraud,
 plot(rand_for_ROC_c, col = "#627502", main = "Balanced vs Unbalanced (Random Forest)" )
 plot(rand_for_ROC_b_test, col = "#cf4696",add = TRUE)
 legend(.4,.18, legend = c("Unbalanced", "Balanced"), col = c("#627502","#cf4696"), lty = 1 )
-anot <- paste( "Unbalanced - Balanced Area : ", round((rand_for_ROC_c$auc - rand_for_ROC_b_test$auc), 4) )
+for_unb_perf <- round((rand_for_ROC_c$auc - rand_for_ROC_b_test$auc), 4)
+anot <- paste( "Unbalanced - Balanced Area : ", for_unb_perf )
 text(labels = anot, x = 0.2, y = .25 )
-
+rm(rand_for_probs_c)
 ```
 
 
-### Tree vs Forest
+# Tree vs Forest
 
 The time has come to compare performance between the two algorithms. For that, we will employ their ROC curves obtained by the unbalanced test sets.
 
+## Unbalanced Test Set ROC Curve
+
+Of all the different ROC curves we obtained, the one closest to real life is the unbalanced (raw data) unseen test set.
 
 ```{r tree_vs_forest, echo = FALSE }
 plot(rand_for_ROC_c, col = "#89c1c4", main = "Tree vs Forest (Unbalanced Test Set)" )
@@ -1064,13 +1074,51 @@ text(labels = anot, x = 0.08, y = .25 )
 
 ```
 
-It becomes obvious that, at least for the AUC metric, **Forest outperforms the Tree**.
+It becomes obvious that, at least for the AUC metric, **Forest outperforms the Tree**. However, that's not the only criterion we would consider. The tree performed much better in the overfitting test. 
+
+## Train - Test Overfit
+
+Another interesting aspect of model performance is its power to learn and generalize. The forest did not do well on that. Let's compare it with the tree.
+
+```{r train_test_overfit_plot, echo = FALSE, message=FALSE }
+temp <- data.frame( model = c("Tree","Forest"), performance = c(tree_overfit,for_overfit)  )
+
+temp %>%ggplot( aes(x = model, y = performance  ) ) + 
+  geom_point(size = 9, col = "#7cd8f7")+
+  geom_vline(xintercept = 1:2, col = "darkgray") + 
+  geom_text( aes(label =(performance), size = 5), show.legend = FALSE , col = "black" ) +
+  coord_flip()+
+  labs(title = "Train - Test Difference per Model", x = "", y = "" )+
+  theme_classic()
+  
+```
+
+Apparently, the tree is by far better in overfitting between train an test sets.
+
+## Balanced - Unbalanced Difference
+
+We will proceed accordingly with the Balanced - Unbalanced diff.
+```{r}
+temp <- data.frame( model = c("Tree","Forest"), performance = c(tree_unb_perf,for_unb_perf)  )
+
+temp %>%ggplot( aes(x = model, y = performance  ) ) + 
+  geom_point(size = 9, col = "#d591ff")+
+  geom_vline(xintercept = 1:2, col = "darkgray") + 
+  geom_text( aes(label =(performance), size = 5), show.legend = FALSE , col = "black" ) +
+  coord_flip()+
+  labs(title = "Balanced - Unbalanced Dataset Difference per Model", x = "", y = "" )+
+  theme_classic()
+  
+
+```
+
+
 
 # Conclusion
 
 Both classification trees and random forests can become efficient predictors of fraud, provided that they get their hyperparameters tuned and the underlying data gets engineered. 
 
-By this kernel, results seem to slightly favor the random forest against the classification tree but the difference is so small that one could trade it off for speed of training (usually trees are quicker to train).
+By this kernel, ROC curves seem to favor the random forest against the classification tree. Nevertheless, that alone is not a safe criterion. The tree showed strengths in 
 
 Interesting extensions of this kernel include: 
 
