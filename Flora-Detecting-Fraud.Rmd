@@ -53,17 +53,6 @@ df <- unzip(zipfile = (zipfile %>% str_replace_all( "/", "\\\\" ))) %>%
 ```
 
 
-```{r data_import, echo = FALSE }
-#Importing the dataset
-
-zipfile <- "C:\\Users\\voulk\\OneDrive\\Desktop\\PaySim1M.zip"
-
-df <- unzip(zipfile = zipfile) %>% 
-        read.csv(stringsAsFactors = FALSE)#, nrow = 8000) 
-
-
-```
-
 # EDA and Data Cleaning
 
 Successfull machine learning requires good knowledge of the underlying data. This knowledge can help us:
