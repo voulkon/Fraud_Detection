@@ -49,7 +49,7 @@ zipfile <- paste0(getwd(),"/PaySim1M.zip") %>%
   str_replace_all( "/", "\\\\" )
 
 df <- unzip(zipfile = zipfile) %>% 
-        read.csv(stringsAsFactors = FALSE, nrow = 8000) 
+        read.csv(stringsAsFactors = FALSE)#, nrow = 8000) 
 
 ```
 
@@ -981,7 +981,7 @@ As we assumed above, engineered features (isInteger, isZero) seem to play an imp
 
 As we did with the tree, we will take a look at the train vs test set performance:
 
-```{r test_set_preds, echo=FALSE }
+```{r test_set_preds, echo=FALSE, message = FALSE,warning=FALSE }
 #Predictions on train set
 rand_for_pred_b_train <- predict(rand_for_b, train_set_b) #class predictions on test set
 print( "Train Set Confusion Matrix (Balanced Data) : " )
@@ -1010,10 +1010,17 @@ rand_for_ROC_b_test <- roc(response = test_set_b$isFraud,
 
 
 plot(rand_for_ROC_b, col = "#040491", main = "ROC Curve on Balanced Data Set (Forest Train vs Test)" )
-plot(rand_for_ROC_b_test, col = "green", add = TRUE)
-legend(.4,.18, legend = c("Train Set", "Test Set"), col = c("#040491","green"), lty = 1 )
+plot(rand_for_ROC_b_test, col = "#e6874c", add = TRUE)
+legend(.4,.18, legend = c("Train Set", "Test Set"), col = c("#040491","#e6874c"), lty = 1 )
+
+anot <- paste( "Train - Test Area : ", round((rand_for_ROC_b$auc - rand_for_ROC_b_test$auc), 4) )
+
+text(labels = anot, x = 0.2, y = .25 )
+
 
 ```
+
+Yet again, very little overfitting.
 
 ### Balanced vs Unbalanced
 
@@ -1021,10 +1028,11 @@ legend(.4,.18, legend = c("Train Set", "Test Set"), col = c("#040491","green"), 
 rand_for_pred_c <- predict(rand_for_b, random_sample) #class predictions on random sample set
 print("Rando Sample Confusion Matrix (Unbalanced Data) : ")
 confusionMatrix(random_sample$isFraud, rand_for_pred_c) #results report
+rm(rand_for_pred_c)
 ```
 
 
-```{r random_ROC, echo=FALSE}
+```{r random_ROC, echo=FALSE, message = FALSE}
 rand_for_probs_c <- predict(rand_for_b, random_sample, type = "prob") #probabilities predictions on random sample
 
 rand_for_ROC_c <- roc(response = random_sample$isFraud, 
@@ -1032,8 +1040,11 @@ rand_for_ROC_c <- roc(response = random_sample$isFraud,
                  levels = levels(random_sample$isFraud))
 
 plot(rand_for_ROC_c, col = "#627502", main = "Balanced vs Unbalanced (Random Forest)" )
-plot(rand_for_ROC_b_test, col = "green",add = TRUE)
-legend(.4,.18, legend = c("Unbalanced", "Balanced"), col = c("#627502","green"), lty = 1 )
+plot(rand_for_ROC_b_test, col = "#cf4696",add = TRUE)
+legend(.4,.18, legend = c("Unbalanced", "Balanced"), col = c("#627502","#cf4696"), lty = 1 )
+anot <- paste( "Unbalanced - Balanced Area : ", round((rand_for_ROC_c$auc - rand_for_ROC_b_test$auc), 4) )
+text(labels = anot, x = 0.2, y = .25 )
+
 ```
 
 
@@ -1043,18 +1054,14 @@ The time has come to compare performance between the two algorithms. For that, w
 
 
 ```{r tree_vs_forest, echo = FALSE }
-plot(rand_for_ROC_c, col = "#627502", main = "Balanced vs Unbalanced Test Set (Random Forest)" )
-plot(rpart_ROC_c, col = "#63a105",add = TRUE)
-legend(.4,.18, legend = c("Random Forest", "Classification Tree"), col = c( "#627502","#63a105"), lty = 1 )
+plot(rand_for_ROC_c, col = "#89c1c4", main = "Tree vs Forest (Unbalanced Test Set)" )
+plot(rpart_ROC_c, col = "#b65dcf",add = TRUE)
+legend(.4,.18, legend = c("Random Forest", "Classification Tree"), col = c( "#89c1c4","#b65dcf"), lty = 1 )
 
-print("Area Under The Curve for Balanced")
-print(rand_for_ROC_c$auc)
+anot <- paste( "Forest - Tree Area : ", round((rand_for_ROC_c$auc - rpart_ROC_c$auc), 4) )
+text(labels = anot, x = 0.08, y = .25 )
 
-print("Area Under The Curve for Unbalanced")
-print(rpart_ROC_c$auc)
 
-print("Difference between areas")
-print(rand_for_ROC_c$auc - rpart_ROC_c$auc)
 ```
 
 It becomes obvious that, at least for the AUC metric, **Forest outperforms the Tree**.
