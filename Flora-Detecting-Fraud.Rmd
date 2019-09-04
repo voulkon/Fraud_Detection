@@ -44,9 +44,8 @@ library(ROCR) # ROC Curve
 ```
 
 
-```{r}
+```{r data_import, echo = FALSE}
 zipfile <- paste0(getwd(),"/PaySim1.zip")
-
 
 df <- unzip(zipfile = (zipfile %>% str_replace_all( "/", "\\\\" ))) %>% 
         read.csv(stringsAsFactors = FALSE, nrow = 8000) 
