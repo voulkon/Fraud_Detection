@@ -41,17 +41,15 @@ library(caret) # model training
 library(GGally) # for pairplot
 library(pROC) # ROC Curve
 library(ROCR) # ROC Curve
-library(here) # to handle paths of cloned repo
 ```
 
 
 ```{r}
-zipfile <- paste0(here(),"/PaySim1.zip")
+zipfile <- paste0(getwd(),"/PaySim1.zip")
 
 
-df <- unzip(zipfile = zipfile) %>% 
+df <- unzip(zipfile = (zipfile %>% str_replace_all( "/", "\\\\" ))) %>% 
         read.csv(stringsAsFactors = FALSE, nrow = 8000) 
-
 
 ```
 
