@@ -458,7 +458,7 @@ test_set_b <- predict(pp_b, newdata = test_set_b)
 
 print( "Balanced Train Set Structure : " )
 
-train_set %>% str() %>% print()
+train_set_b %>% str() %>% print()
 
 #Setting up the training parameters
 tr <- trainControl(method = "repeatedcv", #repeated cross validation 
