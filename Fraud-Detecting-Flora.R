@@ -1,5 +1,3 @@
-knitr::opts_chunk$set(echo = TRUE)
-
 # Data Manipulation
 if(!require(tidyverse)) install.packages("tidyverse",
                               repos = "http://cran.us.r-project.org")
