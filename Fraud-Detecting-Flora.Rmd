@@ -994,7 +994,7 @@ plot(rand_for_b$finalModel, main = "Estimated Error by Number of Trees")
 ```
 
 
-Seems like all lines reach a plateau at around 70 - 100 trees.
+Seems like all lines reach a plateau at around 70 - 100 trees. Luckily for us, we included such values in the our tune grid.
 
 #### Variable Importance
 
@@ -1069,7 +1069,7 @@ anot <- paste( "Train - Test Area : ", for_overfit  )
 text(labels = anot, x = 0.2, y = .25 )
 ```
 
-Looks like the forest did not avoid overfitting as the tree did. Especially the line representing train set results looks suspiciously perfect. 
+Looks like the forest, unlike the tree, did not avoid overfitting. Especially the line representing train set results looks suspiciously perfect. 
 
 ### Balanced vs Unbalanced
 
@@ -1124,7 +1124,7 @@ text(labels = anot, x = 0.08, y = .25 )
 
 ```
 
-It becomes obvious that, at least for the AUC metric, **Forest outperforms the Tree**. However, that's not the only criterion we would consider.  
+It becomes obvious that, at least for the AUC metric, **the Forest outperforms the Tree**. However, that's not the only criterion we would consider.  
 
 ## Train - Test Overfit
 
@@ -1143,7 +1143,7 @@ temp %>%ggplot( aes(x = model, y = performance  ) ) +
   
 ```
 
-Apparently, the tree is by far better in overfitting between train an test sets.
+Apparently, the tree is by far better in overfitting between train and test sets.
 
 ## Balanced - Unbalanced Difference
 
@@ -1187,7 +1187,6 @@ Interesting extensions of this kernel include:
 Because most of the code chunks are hidden in the report, here is the raw code.
 
 ```{r code_used, eval=FALSE }
-knitr::opts_chunk$set(echo = TRUE)
 
 # Data Manipulation
 if(!require(tidyverse)) install.packages("tidyverse",
@@ -1237,7 +1236,8 @@ df %>% str()
 df %>% ggplot(aes(x = isFraud, y = (..count..))) +
     geom_bar(fill =  c( "#5b7fb0", "#c2695b" ) , stat = "count")+
     geom_label(stat='count',aes(   label=  paste0(  round(   ((..count..)/sum(..count..)) ,4)*100 ,  "%" ) ) )+ #add the percentage of each type as label
-    labs(x = "Fraud or Not", y = "Frequency", title = "Frequency of Fraud", subtitle = "Labels as percent of Total Observations")+
+    labs(x = "Fraud or Not", y = "Frequency", title = "Frequency of Fraud", 
+         subtitle = "Labels as percent of Total Observations")+
     theme_linedraw()
 
 
@@ -1289,7 +1289,8 @@ grid.arrange(p3,p4,ncol = 2)
 rm(p3,p4)
 
 #Create a color palette
-type_colors <- c(CASH_IN = "#78858f", CASH_OUT = "#CC6600", DEBIT ="#6A4491", PAYMENT = "#FFC233", TRANSFER = "#788f78")
+type_colors <- c(CASH_IN = "#78858f", CASH_OUT = "#CC6600", 
+                 DEBIT ="#6A4491", PAYMENT = "#FFC233", TRANSFER = "#788f78")
 
 #Count of type in fraud cases
 p1 <- df %>% filter(isFraud == "Fraud") %>% 
@@ -1306,7 +1307,8 @@ p2 <-df %>% filter(isFraud == "No_Fraud") %>%
     ggplot( aes( x = isFraud, fill = type ) ) +
     geom_bar()+
     scale_fill_manual(values=type_colors) +
-    labs(subtitle =  "No Fraud Cases", x = "", y = "Frequency" ) + coord_flip() + theme_linedraw() +
+    labs(subtitle =  "No Fraud Cases", x = "", y = "Frequency" ) + 
+    coord_flip() + theme_linedraw() +
     theme(axis.text.y = element_blank())
 
 grid.arrange(p1,p2,nrow = 2)
@@ -1360,7 +1362,8 @@ df %>% sample_n(floor(nrow(df)*.03)) %>%
     geom_jitter(aes( x = as.numeric(step), y = log(amount+1,10)), alpha = .9, col = "#2ff7b5")+
     facet_grid(~isFraud)+
     scale_x_continuous(breaks = temp )+
-    labs(x = "Hour", y = "Amount (in a log10 scale)", title = "Transaction Amounts by hour", subtitle = "")+
+    labs(x = "Hour", y = "Amount (in a log10 scale)", 
+         title = "Transaction Amounts by hour", subtitle = "")+
     theme_minimal()+
     theme(panel.border = element_rect(colour = "black", fill=NA, size=3) )
 
@@ -1368,7 +1371,8 @@ df %>%
     ggplot(aes(x = "isFraud", y = log(amount,10) , fill = isFraud)) + 
     geom_violin() + coord_flip() + 
     scale_fill_manual(values=c("#40448f", "#7d1f6d") , name="Mean", labels=c( "No Fraud","Fraud"))+
-    labs(x = "", y = "Amount (in a log 10 scale)", title = "Amount of Transactions", subtitle = "Fraud vs Not Fraud Cases" ) +
+    labs(x = "", y = "Amount (in a log 10 scale)", 
+         title = "Amount of Transactions", subtitle = "Fraud vs Not Fraud Cases" ) +
     stat_summary(fun.y = "mean",geom = "point", size = 2, col =c("#40448f", "#7d1f6d"))+
     theme_classic() 
 
@@ -1378,7 +1382,8 @@ p5 <- df %>%
     ggplot(aes(x = isFraud, y = log(Old_Balance_of_Origin+1,10) , fill = isFraud)) + 
     geom_boxplot(alpha = .3) + coord_flip() + 
     scale_fill_manual(values=c("navy", "darkred"))+
-    labs(x = "", y = paste(labs[1], "(in a log 10 scale)"), title = paste("Amount of", labs[1] ), subtitle = "Fraud vs Not Fraud Cases"  ) +
+    labs(x = "", y = paste(labs[1], "(in a log 10 scale)"), 
+         title = paste("Amount of", labs[1] ), subtitle = "Fraud vs Not Fraud Cases"  ) +
     theme_linedraw()
 
 
@@ -1386,7 +1391,8 @@ p6 <- df %>%
     ggplot(aes(x = isFraud, y = log(New_Balance_of_Origin+1,10) , fill = isFraud)) + 
     geom_boxplot(alpha = .3) + coord_flip() + 
     scale_fill_manual(values=c("navy", "darkred"))+
-    labs(x = "", y = paste(labs[2], "(in a log 10 scale)"), title = paste("Amount of", labs[2] ) ) +
+    labs(x = "", y = paste(labs[2], "(in a log 10 scale)"), 
+         title = paste("Amount of", labs[2] ) ) +
     theme_linedraw()
 
 grid.arrange(p5,p6)
@@ -1396,7 +1402,8 @@ p7 <- df %>%  filter(Old_Balance_of_Origin != 0) %>%
     ggplot(aes(x = isFraud, y = log(Old_Balance_of_Origin+1,10) , fill = isFraud)) + 
     geom_boxplot(alpha = .3) + coord_flip() + 
     scale_fill_manual(values=c("navy", "darkred"))+
-    labs(x = "", y = paste(labs[1], "(in a log 10 scale)"), title = paste("Amount of", labs[1] ), subtitle = "Fraud vs Not Fraud Cases (zero values omitted)"  )+
+    labs(x = "", y = paste(labs[1], "(in a log 10 scale)"), 
+         title = paste("Amount of", labs[1] ), subtitle = "Fraud vs Not Fraud Cases (zero values omitted)"  )+
     theme_linedraw()
 
 
@@ -1404,7 +1411,8 @@ p8 <- df %>% filter(New_Balance_of_Origin != 0) %>%
     ggplot(aes(x = isFraud, y = log(New_Balance_of_Origin+1,10) , fill = isFraud)) + 
     geom_boxplot(alpha = .3) + coord_flip() + 
     scale_fill_manual(values=c("navy", "darkred"))+
-    labs(x = "", y = paste(labs[2], "(log 10 scale)"), title = paste("Amount of", labs[2] )  )+
+    labs(x = "", y = paste(labs[2], "(log 10 scale)"), 
+         title = paste("Amount of", labs[2] )  )+
     theme_linedraw()
 
 grid.arrange(p7,p8)
@@ -1414,14 +1422,16 @@ p9 <- df %>% filter(Old_Balance_of_Destination != 0) %>%
     ggplot(aes(x = isFraud, y = log(Old_Balance_of_Destination+1,10) , fill = isFraud)) + 
     geom_boxplot(alpha = .3) + coord_flip() + 
     scale_fill_manual(values=c("navy", "darkred"))+
-    labs(x = "", y = paste(labs[3], "(in a log 10 scale)"), title = paste("Amount of", labs[3] ), subtitle = "Fraud vs Not Fraud Cases (zero values omitted)"  )+
+    labs(x = "", y = paste(labs[3], "(in a log 10 scale)"), 
+         title = paste("Amount of", labs[3] ), subtitle = "Fraud vs Not Fraud Cases (zero values omitted)"  )+
     theme_linedraw()
 
 p10 <- df %>% filter(New_Balance_of_Destination != 0) %>%
     ggplot(aes(x = isFraud, y = log(New_Balance_of_Destination+1,10) , fill = isFraud)) + 
     geom_boxplot(alpha = .3) + coord_flip() + 
     scale_fill_manual(values=c("navy", "darkred"))+
-    labs(x = "", y = paste(labs[4], "(in a log 10 scale)"), title = paste("Amount of", labs[4] ) )+
+    labs(x = "", y = paste(labs[4], "(in a log 10 scale)"), 
+         title = paste("Amount of", labs[4] ) )+
     theme_linedraw()
 
 grid.arrange(p9,p10)
@@ -1460,7 +1470,9 @@ p13 <- df %>% filter(isFraud == "No_Fraud") %>%
     ggplot( aes( x = isFraud, fill = isZero_Old_Balance_of_Or ) ) + 
     geom_bar(position = "fill") + 
     labs(x = "", y = "", subtitle = "No Fraud") +
-    geom_label(stat="count",aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), position = position_fill(vjust=0.5)) +
+    geom_label(stat="count",
+               aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), 
+               position = position_fill(vjust=0.5)) +
     scale_fill_manual(values =  c("#69b0b3", "#d0e872"), #colors
                       labels = c("Not_Zero", "Zero"), #legend labels
                       name = "Is Old Balance of Origin Zero?") + #legend title
@@ -1473,7 +1485,9 @@ p14 <- df %>% filter(isFraud == "Fraud") %>%
     ggplot( aes( x = isFraud, fill = isZero_Old_Balance_of_Or ) ) + 
     geom_bar(position = "fill") + 
     labs(x = "", y = "Percentage",subtitle = "Fraud") +
-    geom_label(stat="count",aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), position = position_fill(vjust=0.5)) +
+    geom_label(stat="count",
+               aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), 
+               position = position_fill(vjust=0.5)) +
     scale_fill_manual(values =  c("#69b0b3", "#d0e872"), #colors
                       labels = c("Not_Zero", "Zero"), #legend labels
                       name = "Is Old Balance of Origin Zero?")+ #legend title
@@ -1485,7 +1499,9 @@ p15 <- df %>% filter(isFraud == "No_Fraud") %>%
     ggplot( aes( x = isFraud, fill = isZero_New_Balance_of_Or ) ) + 
     geom_bar(position = "fill") + 
     labs(x = "", y = "",subtitle="No Fraud") +
-    geom_label(stat="count",aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), position = position_fill(vjust=0.5)) +
+    geom_label(stat="count",
+               aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), 
+               position = position_fill(vjust=0.5)) +
     scale_fill_manual(values =  c("#69b0b3", "#d0e872"), 
                       labels = c("Not_Zero", "Zero"),
                       name = "Is New Balance of Origin Zero?") +
@@ -1497,7 +1513,9 @@ p16 <- df %>% filter(isFraud == "Fraud") %>%
     ggplot( aes( x = isFraud, fill = isZero_New_Balance_of_Or ) ) + 
     geom_bar(position = "fill") + 
     labs(x = "", y = "Percentage",subtitle = "Fraud") + 
-    geom_label(stat="count",aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), position = position_fill(vjust=0.5)) +
+    geom_label(stat="count",
+               aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), 
+               position = position_fill(vjust=0.5)) +
     scale_fill_manual(values =  c("#69b0b3", "#d0e872"), 
                       labels = c("Not_Zero", "Zero"),
                       name = "Is New Balance of Origin Zero?")+
@@ -1515,7 +1533,9 @@ p17 <- df %>% filter(isFraud == "No_Fraud") %>%
     ggplot( aes( x = isFraud, fill = isZero_Old_Balance_of_Destina ) ) + 
     geom_bar(position = "fill") + 
     labs(x = "", y = "Percentage",subtitle = "No Fraud") +
-    geom_label(stat="count",aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), position = position_fill(vjust=0.5)) +
+    geom_label(stat="count",
+               aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), 
+               position = position_fill(vjust=0.5)) +
     scale_fill_manual(values =  c("#69b0b3", "#d0e872"), #colors
                       labels = c("Not_Zero", "Zero"), #legend labels
                       name = "Is Old Balance of Destination Zero?") + #legend title
@@ -1527,7 +1547,9 @@ p18 <- df %>% filter(isFraud == "Fraud") %>%
     ggplot( aes( x = isFraud, fill = isZero_Old_Balance_of_Destina ) ) + 
     geom_bar(position = "fill") + 
     labs(x = "", y = "Percentage", subtitle = "Fraud") +
-    geom_label(stat="count",aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), position = position_fill(vjust=0.5)) +
+    geom_label(stat="count",
+               aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), 
+               position = position_fill(vjust=0.5)) +
     scale_fill_manual(values =  c("#69b0b3", "#d0e872"), #colors
                       labels = c("Not_Zero", "Zero"), #legend labels
                       name = "Is Old Balance of Destination Zero?")+ #legend title
@@ -1539,7 +1561,9 @@ p19 <- df %>% filter(isFraud == "No_Fraud") %>%
     ggplot( aes( x = isFraud, fill = isZero_New_Balance_of_Destina ) ) + 
     geom_bar(position = "fill") + 
     labs(x = "", y = "Percentage",subtitle = "No Fraud") +
-    geom_label(stat="count",aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), position = position_fill(vjust=0.5)) +
+    geom_label(stat="count",
+               aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), 
+               position = position_fill(vjust=0.5)) +
     scale_fill_manual(values =  c("#69b0b3", "#d0e872"), 
                       labels = c("Not_Zero", "Zero"),
                       name = "Is New Balance of Destination Zero?") +
@@ -1551,7 +1575,9 @@ p20 <- df %>% filter(isFraud == "Fraud") %>%
     ggplot( aes( x = isFraud, fill = isZero_New_Balance_of_Destina ) ) + 
     geom_bar(position = "fill") + 
     labs(x = "", y = "Percentage", subtitle = "Fraud") + 
-    geom_label(stat="count",aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), position = position_fill(vjust=0.5)) +
+    geom_label(stat="count",
+               aes(label= paste0(round(((..count..)/sum(..count..)*100),2),"%") ), 
+               position = position_fill(vjust=0.5)) +
     scale_fill_manual(values =  c("#69b0b3", "#d0e872"), 
                       labels = c("Not_Zero", "Zero"),
                       name = "Is New Balance of Destination Zero?")+
@@ -1573,7 +1599,8 @@ df_small <- df %>% sample_n(floor(nrow(df)*.1))
 
 #Pairplot
 df_small[ ,sapply(df,is.numeric)]  %>% 
-    ggpairs(mapping=ggplot2::aes(colour = df_small$isFraud), title = "Numeric Features",columnLabels = labs, axisLabels = "none")
+    ggpairs(mapping=ggplot2::aes(colour = df_small$isFraud), 
+            title = "Numeric Features",columnLabels = labs, axisLabels = "none")
 rm(df_small)
 
 high_cor_feats <- findCorrelation(
@@ -1585,10 +1612,8 @@ high_cor_feats <- findCorrelation(
 print("High Correlation Features to be Removed")
 print(high_cor_feats)
 
-
 # Drop the highly correlated columns
 df <- df %>% select( -high_cor_feats )
-
 
 #Finding the number of fraud instances
 n_minority <- df %>% filter(isFraud == "Fraud") %>% nrow()
@@ -1602,13 +1627,15 @@ df_bal <- df %>% filter(isFraud == "Fraud") %>% rbind( rand_majority ) %>% arran
 #Repeat the frequencies bar plots to contrast with the earlier version of our dataset
 p5 <- df %>% ggplot(aes(x = isFraud, y = (..count..))) + 
     geom_bar(fill =  c( "#5b7fb0", "#c2695b" ), stat = "count")+
-    geom_label(stat='count',aes(   label=  paste0(  round(   ((..count..)/sum(..count..)) ,4)*100 ,  "%" ) ) )+
+    geom_label(stat='count',
+               aes(   label=  paste0(  round(   ((..count..)/sum(..count..)) ,4)*100 ,  "%" ) ) )+
     labs(x = "Fraud or Not", y = "Frequency", title = "Frequency of Fraud before Undersampling", subtitle = "Labels as percent of Total Observations")+
     theme_linedraw()
 
 p6 <- df_bal %>% ggplot(aes(x = isFraud, y = (..count..))) + 
     geom_bar(fill =  c( "#5b7fb0", "#c2695b" ), stat = "count")+
-    geom_label(stat='count',aes(   label=  paste0(  round(   ((..count..)/sum(..count..)) ,4)*100 ,  "%" ) ) )+
+    geom_label(stat='count',
+               aes(   label=  paste0(  round(   ((..count..)/sum(..count..)) ,4)*100 ,  "%" ) ) )+
     labs(x = "Fraud or Not", y = "Frequency", title = "Frequency of Fraud after Undersampling ", subtitle = "Labels as percent of Total Observations") + 
     theme_linedraw()
 
@@ -1665,7 +1692,8 @@ rpart_model_b <- train(isFraud ~ ., #training formula --
                                     #we want to predict isFraud by using all available predictors
                     data = train_set_b, #our balanced dataset
                     method = "rpart", # library containing the tree algorithm
-                    tuneLength = 10, # number of different default values used to optimize complexity parameter
+                    tuneLength = 10, # number of different default values used
+                                     # to optimize complexity parameter
                     metric = "ROC", # estimate success by the area under the ROC curve
                     trControl = tr, # use cross validation as defined above
                     parms=list(split='information')) 
@@ -1684,7 +1712,8 @@ rpart_test_pred_b <- predict(rpart_model_b, test_set_b) #class predictions on te
 confusionMatrix(test_set_b$isFraud, rpart_test_pred_b) #results report
 rm(rpart_test_pred_b)
 
-rpart_probs_b <- predict(rpart_model_b, test_set_b, type = "prob") #probabilities predictions on balanced test set
+#probabilities predictions on balanced test set
+rpart_probs_b <- predict(rpart_model_b, test_set_b, type = "prob") 
 
 rpart_ROC_b <- roc(response = test_set_b$isFraud, 
                  predictor = rpart_probs_b$Fraud, 
@@ -1848,7 +1877,8 @@ plot(rand_for_ROC_c, col = "#89c1c4", main = "Tree vs Forest (Unbalanced Test Se
 #Roc curve of tree
 plot(rpart_ROC_c, col = "#b65dcf",add = TRUE)
 #Show legend
-legend(.4,.18, legend = c("Random Forest", "Classification Tree"), col = c( "#89c1c4","#b65dcf"), lty = 1 )
+legend(.4,.18, legend = c("Random Forest", "Classification Tree"), 
+       col = c( "#89c1c4","#b65dcf"), lty = 1 )
 #Display the difference
 anot <- paste( "Forest - Tree Area : ", round((rand_for_ROC_c$auc - rpart_ROC_c$auc), 4) )
 text(labels = anot, x = 0.08, y = .25 )
